@@ -57,7 +57,18 @@ class JSONDiffTestCase(unittest.TestCase):
                            '.name': 'Kyiv'}))
         self.assertEqual(json_flat_diff(json_flatten(self.data1), {})[0],
                          json_flat_diff({}, json_flatten(self.data1))[1])
-
+    
+    def test_diff_str(self):
+        
+        diff = json_flat_diff(json_flatten(self.data1),json_flatten(self.data2))
+        msg = json_diff_str(diff)
+        self.assertEqual(len(msg), 5)
+        
+        # Test optional parameter: specify_keys (full match)
+        diff = json_flat_diff(json_flatten(self.data1),json_flatten(self.data2))
+        msg = json_diff_str(diff, specify_keys=['.name'])
+        self.assertEqual(len(msg), 1)
+        self.assertTrue('.name:' in msg[0])
 
 def suite():
     loader = unittest.TestLoader()

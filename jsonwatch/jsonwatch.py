@@ -43,7 +43,7 @@ def json_print(jsn):
     print(json.dumps(jsn, indent=4))
 
 
-def poll_loop(interval, req, date=True, initial_values=True):
+def poll_loop(interval, req, date=True, initial_values=True, specify_keys=None):
     """Perform requests for JSON data. Print out changes when they occur."""
 
     prev_output = None
@@ -64,7 +64,7 @@ def poll_loop(interval, req, date=True, initial_values=True):
                 prev_output, output = output, json_flatten(req.perform())
                 diff = json_flat_diff(prev_output, output)
                 if diff is not None:
-                    msg = json_diff_str(diff)
+                    msg = json_diff_str(diff, specify_keys)
                     msg.sort()
                     # If msg is multi-line print each difference on a new line
                     # with indentation.
@@ -103,9 +103,17 @@ def main():
                         help='don\'t print the initial JSON values',
                         default=True, required=False,
                         dest='print_init_val', action='store_false')
+    parser.add_argument('--specify-keys',
+                        help='Only watch specified keys. Separate multiple values with a space. \
+                        Keys are supplied in `flattened` form. For content \
+                        {"a":{"x":1,"y":2,"z":3}} the argument `--specify-keys .a.x .a.y` would \
+                        report the values 1 and 2 but not 3.',
+                        default=None, required=False,
+                        dest='specify_keys', nargs='*',
+                        metavar='flattened.key')
     # Process command line arguments.
     args = parser.parse_args()
-
+    
     # If both or none of 'url' and 'command' given display help and exit.
     if (args.url == '') == (args.command == ''):
         parser.print_help()
@@ -120,7 +128,7 @@ def main():
         if args.interval is None:
             args.interval = 5
         req = JSONRequestCommand(args.command)
-    poll_loop(args.interval, req, args.print_date, args.print_init_val)
+    poll_loop(args.interval, req, args.print_date, args.print_init_val, specify_keys=args.specify_keys)
 
 
 if __name__ == "__main__":

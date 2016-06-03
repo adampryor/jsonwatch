@@ -91,7 +91,7 @@ def json_flat_diff(a, b):
     return (res_a, res_b) if res_a != {} else None
 
 
-def json_diff_str(diff):
+def json_diff_str(diff, specify_keys=None):
     """Format a diff for human reading. Retuns a list of strs."""
 
     res = []
@@ -99,6 +99,12 @@ def json_diff_str(diff):
     flat_diff_from = remove_none_values(flat_diff_from)
     flat_diff_to = remove_none_values(flat_diff_to)
     common_keys, _, _, from_keys, to_keys = c_keys(flat_diff_from, flat_diff_to)
+    
+    if specify_keys is not None:
+        from_keys = set(from_keys).intersection(specify_keys)
+        to_keys = set(to_keys).intersection(specify_keys)
+        common_keys = set(common_keys).intersection(specify_keys)
+        
     for key in from_keys:
         res.append("- {0}: {1}".format(key, flat_diff_from[key]))
     for key in common_keys:
